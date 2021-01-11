@@ -1,0 +1,19 @@
+Package: annealedSMC
+Title: Annealed SMC for estimating differential equation parameters
+Version: 0.0.0.9000
+Authors@R: 
+    c(person(given = "Renny",
+             family = "Doig",
+             role = c("aut", "cre"),
+             email = "rennyd@sfu.ca"),
+      person(given = "Liangliang",
+      	      family = "Wang",
+      	      role = c("aut")))
+Description: Uses annealed SMC to sample from posterior distribution of 
+    differential equation parameters. Requires user specify DE system, prior, 
+    and likelihood functions.
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Depends: deSolve, ggplot2, parallel, dplyr, bridgesampling, rootSolve, purrr
