@@ -19,7 +19,7 @@
 #' @return Estimated marginal likelihood of the data
 #'
 #' @export
-getMarginalLikelihood2_LP = function(result_list, burn_in, is_unknownPar, data, ODEmodel, likelihood, likeliParam_fixed=NULL, hyperpar, prior_list, lower_bound, upper_bound, ...){
+getMarginalLikelihood = function(result_list, burn_in, is_unknownPar, data, ODEmodel, likelihood, likeliParam_fixed=NULL, hyperpar, prior_list, lower_bound, upper_bound, ...){
   with( c(data), {
     # extract the number of DE parameters, number of unknown parameters, DE param names, fixed DE parameters
     n_DEpar = length(result_list[[1]]$theta)
@@ -54,7 +54,7 @@ getMarginalLikelihood2_LP = function(result_list, burn_in, is_unknownPar, data, 
         names(likeliParam) = names(samples)[-(1:n_unknownPar)]
 
         # function for evaluating the likelihood of a single sample
-        eval_likelihood = logLik2_LP(ODEmodel, theta, data, likelihood, likeliParam_fixed, likeliParam, 1)
+        eval_likelihood = logLik(ODEmodel, theta, data, likelihood, likeliParam_fixed, likeliParam, 1)
 
         # evaluate the prior of theta
         ind = prior_par$theta$index_unknown

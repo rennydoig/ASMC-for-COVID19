@@ -40,8 +40,8 @@ MH_likeliParam <- function(LP_new, LP_old, ODEmodel, theta, data, likelihood,
   }
 
   # compute the numerator and denominator of the MH ratio
-  num <- logLik2_LP(ODEmodel, theta, data, likelihood, likeliParam_fixed, LP_new, alpha)
-  den <- logLik2_LP(ODEmodel, theta, data, likelihood, likeliParam_fixed, LP_old, alpha)
+  num <- logLik(ODEmodel, theta, data, likelihood, likeliParam_fixed, LP_new, alpha)
+  den <- logLik(ODEmodel, theta, data, likelihood, likeliParam_fixed, LP_old, alpha)
 
   # compute the MH ratio
   ratio = ifelse(is_MCMC,
