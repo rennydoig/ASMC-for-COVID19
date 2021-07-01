@@ -18,7 +18,7 @@
 #' @return List of results
 #'
 #' @export
-ASMC2_LP2 <- function(K, smc_tuning_param, data, is_unknownPar, ODEmodel, ODEparameters,
+ASMC <- function(K, smc_tuning_param, data, is_unknownPar, ODEmodel, ODEparameters,
                      likelihood, likeliParam_fixed, likeliParam_unknown=NULL, reference_prior_list, hyperpar, n_core=1){
   # if there are no likelihood parameters to be estimated, add dummy components to prior & reference distributions
   if( is.null(likeliParam_unknown) )
@@ -94,26 +94,26 @@ ASMC2_LP2 <- function(K, smc_tuning_param, data, is_unknownPar, ODEmodel, ODEpar
                      
                      if(n_core>1){
                        u = (parSapply(cl, 1:K, function(k){
-                         LogL = logLik2_LP(ODEmodel,
-                                           particle_list[[k]]$theta,
-                                           data,
-                                           likelihood,
-                                           likeliParam_fixed,
-                                           particle_list[[k]]$likeliParam,
-                                           alpha=1)
+                         LogL = logLik(ODEmodel,
+                                       particle_list[[k]]$theta,
+                                       data,
+                                       likelihood,
+                                       likeliParam_fixed,
+                                       particle_list[[k]]$likeliParam,
+                                       alpha=1)
                          return (LogL + logPriorReference$theta(particle_list[[k]]$theta, prior_par$theta, reference_par$theta) +
                                    logPriorReference$likeliParam(particle_list[[k]]$likeliParam, prior_par$likeliParam, reference_par$likeliParam))
                        }))
                      }
                      else{
                        u = (sapply(1:K, function(k){
-                         LogL = logLik2_LP(ODEmodel,
-                                           particle_list[[k]]$theta,
-                                           data,
-                                           likelihood,
-                                           likeliParam_fixed,
-                                           particle_list[[k]]$likeliParam,
-                                           alpha=1)
+                         LogL = logLik(ODEmodel,
+                                       particle_list[[k]]$theta,
+                                       data,
+                                       likelihood,
+                                       likeliParam_fixed,
+                                       particle_list[[k]]$likeliParam,
+                                       alpha=1)
                          return (LogL + logPriorReference$theta(particle_list[[k]]$theta, prior_par$theta, reference_par$theta) +
                                    logPriorReference$likeliParam(particle_list[[k]]$likeliParam, prior_par$likeliParam, reference_par$likeliParam))
                        }))
@@ -153,19 +153,19 @@ ASMC2_LP2 <- function(K, smc_tuning_param, data, is_unknownPar, ODEmodel, ODEpar
                            names(new_theta) <- names(theta)
                            
                            # perform MCMC move
-                           if(MH_theta2_LP(new_theta,
-                                           ODEmodel,
-                                           theta,
-                                           data,
-                                           likelihood,
-                                           likeliParam_fixed,
-                                           likeliParam,
-                                           alpha[[r]],
-                                           prior_par,
-                                           reference_par,
-                                           logPriorsRatio,
-                                           logReferenceRatio,
-                                           is_MCMC = F))
+                           if(MH_theta(new_theta,
+                                       ODEmodel,
+                                       theta,
+                                       data,
+                                       likelihood,
+                                       likeliParam_fixed,
+                                       likeliParam,
+                                       alpha[[r]],
+                                       prior_par,
+                                       reference_par,
+                                       logPriorsRatio,
+                                       logReferenceRatio,
+                                       is_MCMC = F))
                            {
                              theta  <- new_theta
                              accept_theta[rand_num] <- TRUE
@@ -189,19 +189,19 @@ ASMC2_LP2 <- function(K, smc_tuning_param, data, is_unknownPar, ODEmodel, ODEpar
                              names(LP_new) <- names(likeliParam_unknown)
                              
                              # compute MH acceptance
-                             if(MH_likeliParam2(LP_new,
-                                                likeliParam,
-                                                ODEmodel,
-                                                theta,
-                                                data,
-                                                likelihood,
-                                                likeliParam_fixed,
-                                                alpha[[r]],
-                                                prior_par,
-                                                reference_par,
-                                                logPriorsRatio,
-                                                logReferenceRatio,
-                                                F)){
+                             if(MH_likeliParam(LP_new,
+                                               likeliParam,
+                                               ODEmodel,
+                                               theta,
+                                               data,
+                                               likelihood,
+                                               likeliParam_fixed,
+                                               alpha[[r]],
+                                               prior_par,
+                                               reference_par,
+                                               logPriorsRatio,
+                                               logReferenceRatio,
+                                               F)){
                                likeliParam = LP_new
                                accept_LP[which_LP] = T
                              }
@@ -259,14 +259,13 @@ ASMC2_LP2 <- function(K, smc_tuning_param, data, is_unknownPar, ODEmodel, ODEpar
   
 }
 
-logLik2_LP <- function(ODEmodel, ODEparameters, data, likelihood, likeliParam_fixed, likeliParam_unknown, alpha) {
-  require(deSolve)
+logLik <- function(ODEmodel, ODEparameters, data, likelihood, likeliParam_fixed, likeliParam_unknown, alpha) {
   with(c(data), {
     # combine the likelihood parameters
     likeliParam = unlist(c(likeliParam_fixed, likeliParam_unknown))
     
     # solve the DE trajectory
-    out = ode(y=initial_state, times=t, func=ODEmodel, parms=unlist(ODEparameters))
+    out = deSolve::ode(y=initial_state, times=t, func=ODEmodel, parms=unlist(ODEparameters))
     
     # compute the tempered likelihood
     if( partial_likelihood ){
@@ -285,4 +284,75 @@ logLik2_LP <- function(ODEmodel, ODEparameters, data, likelihood, likeliParam_fi
     return(temp)
   })
   
+}
+
+# bisection function
+# - recursive implementation of bisection algorithm
+bisection <- function(low, high, W, u, phi ){
+  
+  mid <- (low+high)/2
+  f.low <- rCESS( W, u, low, phi )
+  f.mid <- rCESS( W, u, mid, phi )
+  f.high <- rCESS( W, u, high, phi )
+  
+  # browser()
+  if( f.low*f.high>0 )
+    stop('Invalid endpoint for bisection.')
+  
+  try({if( low>=high )
+    stop('bisection overlap')
+    
+    if( (abs(f.mid)<1e-10)||((high-low)/2<1e-10) )
+      return( mid )
+    if( (f.low*f.mid)<0 )
+      return( bisection( low, mid, W, u, phi ) )
+    if( (f.high*f.mid)<0 )
+      return( bisection( mid, high, W, u, phi ) )
+  })
+  
+  stop('bisection flawed')
+}
+
+# log-sum-exponential evaluation of log(sum(w))
+logsum <- function(logw)
+{
+  logmax = max(logw)
+  log(sum(exp(logw-logmax)))+logmax
+}
+
+# relative conditional effective sample size
+rCESS <- function(W, u, a, phi) {
+  logw <- a*u          # weight update
+  exp(2*logsum(log(W)+logw) - logsum(log(W)+2*logw)) - phi
+}
+
+# effective sample size
+ESS <- function(logW){
+  K <- length(logW)
+  logWmax <- max(logW)
+  logRESS <- -(2*logWmax + log(sum(exp(2*logW-2*logWmax)))) - log(K)
+  return(exp(logRESS))
+}
+
+# systematic resampling algorithm
+systematic_resample <- function( W ){
+  K <- length(W)
+  U <- runif(1,0,1/K) + 0:(K-1)/K
+  W.sum <- cumsum(W)
+  N <- rep(NA,K)
+  j <- 1
+  for( i in 1:K )
+  {
+    found = F
+    while( !found )
+    {
+      if( U[i]>W.sum[j] )
+        j <- j+1
+      else
+        found = T
+    }
+    N[i] <- j
+  }
+  
+  return( N )
 }

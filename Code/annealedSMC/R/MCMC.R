@@ -16,7 +16,7 @@
 #' @return List containing posterior distribution of DE parameters and basis coefficients
 #'
 #' @export
-MCMC2_LP <- function(K, data, is_unknownPar, ODEmodel, init_DEpar,
+MCMC <- function(K, data, is_unknownPar, ODEmodel, init_DEpar,
                      likelihood, likeliParam_fixed, init_likeliParam_unknown=NULL,
                      prior_list, hyperpar) {
   # if there are no likelihood parameters to be estimated, add dummy components to prior & reference distributions
@@ -58,19 +58,19 @@ MCMC2_LP <- function(K, data, is_unknownPar, ODEmodel, init_DEpar,
       n_sample_theta[rand_num] = n_sample_theta[rand_num] + 1
       new_theta[index_unknownPar[rand_num]] = rnorm(1, sample_list[[r-1]]$theta[index_unknownPar[rand_num]], sd=sigma_theta[index_unknownPar[rand_num]])
 
-      if(MH_theta2_LP(new_theta,
-                      ODEmodel,
-                      sample_list[[r-1]]$theta,
-                      data,
-                      likelihood,
-                      likeliParam_fixed,
-                      sample_list[[r-1]]$likeliParam,
-                      1,
-                      prior_par,
-                      reference_par,
-                      logPriorsRatio,
-                      logReferenceRatio,
-                      is_MCMC = T))
+      if(MH_theta(new_theta,
+                  ODEmodel,
+                  sample_list[[r-1]]$theta,
+                  data,
+                  likelihood,
+                  likeliParam_fixed,
+                  sample_list[[r-1]]$likeliParam,
+                  1,
+                  prior_par,
+                  reference_par,
+                  logPriorsRatio,
+                  logReferenceRatio,
+                  is_MCMC = T))
       {
         sample_list[[r]]$theta = new_theta
         n_accept_theta[rand_num] = n_accept_theta[rand_num]+1
@@ -83,19 +83,19 @@ MCMC2_LP <- function(K, data, is_unknownPar, ODEmodel, init_DEpar,
         new_LP = rnorm(1, sample_list[[r-1]]$likeliParam, sigma_likeliParam)
         names(new_LP) = names(init_likeliParam_unknown)
 
-        if( MH_likeliParam2(new_LP,
-                            sample_list[[r-1]]$likeliParam,
-                            ODEmodel,
-                            sample_list[[r]]$theta,
-                            data,
-                            likelihood,
-                            likeliParam_fixed,
-                            1,
-                            prior_par,
-                            reference_par,
-                            logPriorsRatio,
-                            logReferenceRatio,
-                            T))
+        if( MH_likeliParam(new_LP,
+                           sample_list[[r-1]]$likeliParam,
+                           ODEmodel,
+                           sample_list[[r]]$theta,
+                           data,
+                           likelihood,
+                           likeliParam_fixed,
+                           1,
+                           prior_par,
+                           reference_par,
+                           logPriorsRatio,
+                           logReferenceRatio,
+                           T))
         {
           sample_list[[r]]$likeliParam = new_LP
           n_accept_LP = n_accept_LP + 1

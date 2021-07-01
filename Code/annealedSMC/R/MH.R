@@ -1,4 +1,4 @@
-MH_theta2_LP <- function(theta_new, ODEmodel, theta_old, data, likelihood,
+MH_theta <- function(theta_new, ODEmodel, theta_old, data, likelihood,
                           likeliParam_fixed, likeliParam_unknown, alpha, prior_par, reference_par,
                           logPriorsRatio, logReferenceRatio,  is_MCMC = F){
   # # check whether being used in MCMC or aSMC
@@ -11,8 +11,8 @@ MH_theta2_LP <- function(theta_new, ODEmodel, theta_old, data, likelihood,
 
   # compute the numerator and denominator of the MH ratio
 
-  num <- logLik2_LP(ODEmodel, theta_new, data, likelihood, likeliParam_fixed, likeliParam_unknown, alpha)
-  den <- logLik2_LP(ODEmodel, theta_old, data, likelihood, likeliParam_fixed, likeliParam_unknown, alpha)
+  num <- logLik(ODEmodel, theta_new, data, likelihood, likeliParam_fixed, likeliParam_unknown, alpha)
+  den <- logLik(ODEmodel, theta_old, data, likelihood, likeliParam_fixed, likeliParam_unknown, alpha)
 
   # compute the MH ratio
   ratio = ifelse(is_MCMC,
@@ -28,7 +28,7 @@ MH_theta2_LP <- function(theta_new, ODEmodel, theta_old, data, likelihood,
 }
 
 
-MH_likeliParam2 <- function(LP_new, LP_old, ODEmodel, theta, data, likelihood,
+MH_likeliParam <- function(LP_new, LP_old, ODEmodel, theta, data, likelihood,
                          likeliParam_fixed, alpha, prior_par, reference_par,
                          logPriorsRatio, logReferenceRatio,  is_MCMC = F){
   # # check whether being used in MCMC or aSMC
