@@ -10,12 +10,11 @@ rm(list=ls())
 library(annealedSMC)
 library(purrr)
 library(deSolve)
-library(tictoc)
 library(furrr)
 
 source("likelihood_NB.R")
 
-sim_data <- readRDS("../physdist/sim_data.rds")
+sim_data <- readRDS("../sim_data.rds")
 true <- sim_data$true
 data <- sim_data$sim
 
@@ -165,8 +164,8 @@ hyperpar <- list(sigma_theta = c(0, 0.025, 0, 0, 0, 0.1, 0.6, 0),
 if(file.exists("fit_si_mcmc.rds")){fits <- readRDS("fit_si_mcmc.rds")}else{
   set.seed(51)
   plan(multisession(workers=5))
-  fits <- future_map(data[1:30], ~ MCMC2_LP(K, ., is_unknownPar, Simplemodel, unlist(pars), likelihood_NB,
-                                            unlist(Lpars[!is_unknownLPar]), unlist(Lpars[is_unknownLPar]), prior_list, hyperpar),
+  fits <- future_map(data[1:30], ~ MCMC(K, ., is_unknownPar, Simplemodel, unlist(pars), likelihood_NB,
+                                        unlist(Lpars[!is_unknownLPar]), unlist(Lpars[is_unknownLPar]), prior_list, hyperpar),
                      .options=furrr_options(seed=T))
   plan(sequential)
   saveRDS(fits, "fit_si_mcmc.rds")
@@ -180,8 +179,8 @@ names(ub) <- names(lb) <- c(names(pars)[is_unknownPar], names(Lpars)[is_unknownL
 
 plan(multisesstion(workers=5))
 set.seed(52)
-ml_mcmc <- future_map(1:30, ~ getMarginalLikelihood2_LP(fits[[.]]$sample_list, 22000, is_unknownPar, data[[.]], Simplemodel,
-                                                       likelihood_NB, Lpars[!is_unknownLPar], hyperpar, prior_list, lb, ub, silent=T),
+ml_mcmc <- future_map(1:30, ~ getMarginalLikelihood(fits[[.]]$sample_list, 23000/2, is_unknownPar, data[[.]], Simplemodel,
+                                                    likelihood_NB, Lpars[!is_unknownLPar], hyperpar, prior_list, lb, ub, silent=T),
                       .options=furrr_options(seed=T))
 plan(sequential)
 

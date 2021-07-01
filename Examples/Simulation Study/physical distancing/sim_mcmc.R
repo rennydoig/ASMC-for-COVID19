@@ -92,9 +92,9 @@ M <- 50
 # get simulated data
 set.seed(50)
 
-if(file.exists("sim_data.rds")){sim <- readRDS("sim_data.rds")}else{
+if(file.exists("../sim_data.rds")){sim <- readRDS("../sim_data.rds")}else{
   sim <- multiSim(M, n_samples, likelihood_NB, PhysDistmodel, initial_states, times, c(pars, Lpars))
-  saveRDS(sim, "sim_data.rds")
+  saveRDS(sim, "../sim_data.rds")
 }
 
 truth <- as.data.frame(sim$true)
@@ -199,8 +199,8 @@ set.seed(51)
 
 if(file.exists("fit_pd_mcmc.rds")){ fits <- readRDS("fit_pd_mcmc.rds")}else{
   plan(multisession(workers=15))
-  fits <- future_map(data[1:30], ~ MCMC2_LP(K, ., is_unknownPar, PhysDistmodel, unlist(pars), likelihood_NB,
-                                            unlist(Lpars[!is_unknownLpar]), unlist(Lpars[is_unknownLpar]), prior_list, hyperpar),
+  fits <- future_map(data[1:30], ~ MCMC(K, ., is_unknownPar, PhysDistmodel, unlist(pars), likelihood_NB,
+                                        unlist(Lpars[!is_unknownLpar]), unlist(Lpars[is_unknownLpar]), prior_list, hyperpar),
                      .options=furrr_options(seed=T))
   plan(sequential)
   saveRDS(fits, "fit_pd_mcmc.rds")
@@ -214,8 +214,8 @@ names(ub) <- names(lb) <- c(names(pars)[is_unknownPar], names(Lpars)[is_unknownL
 
 plan(multisession(workers=5))
 set.seed(52)
-ml_mcmc <- future_map(1:30, ~ getMarginalLikelihood2_LP(fits[[.]]$sample_list, 54000, is_unknownPar, data[[.]], PhysDistmodel,
-                                                       likelihood_NB, Lpars[!is_unknownLpar], hyperpar, prior_list, lb, ub, silent=T),
+ml_mcmc <- future_map(1:30, ~ getMarginalLikelihood(fits[[.]]$sample_list, 55000/2, is_unknownPar, data[[.]], PhysDistmodel,
+                                                    likelihood_NB, Lpars[!is_unknownLpar], hyperpar, prior_list, lb, ub, silent=T),
                       .progress=T, .options=future_options(seed=T))
 plan(sequential)
 

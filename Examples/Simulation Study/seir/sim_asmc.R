@@ -16,7 +16,7 @@ library(tictoc)
 
 source("likelihood_NB.R")
 
-sim_data <- readRDS("../physdist/sim_data.rds")
+sim_data <- readRDS("../sim_data.rds")
 true <- sim_data$true
 data <- sim_data$sim
 
@@ -142,14 +142,14 @@ K <- 1000
 ncore <- 10
 smc_param <- list(eps=0.5, phi=0.99, n_move=1)
 hyperpar <- list(sigma_theta1 = c(0, 0.05, 0, 0),
-                 sigam_theta2 = NA,
+                 sigma_theta2 = NA,
                  ksi = 1,
                  sigma_likeliParam = 0.5)
 
 set.seed(51)
 
 if(file.exists("fit_si_asmc.rds")){fits <- readRDS("fit_si_asmc.rds")}else{
-  fits <- map(data, ~ ASMC2_LP2(K, smc_param, ., is_unknownPar, SEIRmodel, pars, likelihood_NB,
+  fits <- map(data, ~ ASMC(K, smc_param, ., is_unknownPar, SEIRmodel, pars, likelihood_NB,
                    Lpars[!is_unknownLPar], Lpars[is_unknownLPar], reference_prior_list, hyperpar, ncore))
   saveRDS(fits, "fit_si_asmc.rds")
 }

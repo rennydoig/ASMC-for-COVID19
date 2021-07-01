@@ -98,9 +98,9 @@ M <- 50
 # get simulated data
 set.seed(50)
 
-if(file.exists("sim_data.rds")){sim <- readRDS("sim_data.rds")}else{
+if(file.exists("../sim_data.rds")){sim <- readRDS("../sim_data.rds")}else{
   sim <- multiSim(M, n_samples, likelihood_NB, PhysDistmodel, initial_states, times, c(pars, Lpars))
-  saveRDS(sim, "sim_data.rds")
+  saveRDS(sim, "../sim_data.rds")
 }
 
 truth <- as.data.frame(sim$true)
@@ -218,7 +218,7 @@ hyperpar <- list(sigma_theta1 = c(0, 0.025, 0, 0, 0.45, 0, 0.1, 0, 0, 0, 0.15, 0
 set.seed(51)
 
 if(file.exists("fit_pd_asmc.rds")){ fits_asmc <- readRDS("fit_pd_asmc.rds")}else{
-  fits <- map(data[1:10], ~ ASMC2_LP2(K, smc_param, ., is_unknownPar, PhysDistmodel, pars, likelihood_NB,
+  fits <- map(data[1:10], ~ ASMC(K, smc_param, ., is_unknownPar, PhysDistmodel, pars, likelihood_NB,
                                 Lpars[!is_unknownLpar], Lpars[is_unknownLpar], prior_reference_list, hyperpar, ncore))
   saveRDS(fits, "fit_pd_asmc.rds")
 }
@@ -281,7 +281,7 @@ ggplot(theta_long.1, aes(x=value)) + geom_histogram(bins=50) +
 
 
 ## Compare against MCMC
-K_mcmc <- 1:(length(fits_mcmc[[1]]$sample_list) - 1000)
+K_mcmc <- 1:(length(fits_mcmc[[1]]$sample_list) / 2)
 theta_mcmc <- map_dfr(fits_mcmc, function(.x){
   map_dfr(.x$sample_list[-K_mcmc], "theta") %>%
     bind_cols(map_dfr(.x$sample_list[-K_mcmc], "likeliParam")) %>%
