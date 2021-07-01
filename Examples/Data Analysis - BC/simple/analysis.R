@@ -11,6 +11,7 @@ library(deSolve)
 library(tidyverse)
 library(lubridate)
 library(cowplot)
+library(annealedSMC)
 
 source('likelihood_delay.R')
 source("functions.R")
@@ -185,7 +186,7 @@ reference_prior_list = list(prior_par = prior_par,
 # ASMC -------------------------------------------------------------------------
 
 hyperpar <- list(sigma_theta1 = c(0, 0.01, 0, 0, 0, 0.05, 0.25, 0),
-                 sigam_theta2 = NA,
+                 sigma_theta2 = NA,
                  ksi = 1,
                  sigma_likeliParam = 0.5)
 
@@ -196,18 +197,18 @@ ncore <- 8
 set.seed(501)
 
 if(file.exists("fit_asmc.rds")){ fit_asmc <- readRDS("fit_asmc.rds")}else{
-  fit_asmc <- ASMC2_LP(K,
-                       smc_tuning_param,
-                       data,
-                       is_unknownPar,
-                       Simplemodel,
-                       pars,
-                       likelihood_delay,
-                       unlist(Lpars[!is_unknownLPar]),
-                       unlist(Lpars[is_unknownLPar]),
-                       reference_prior_list,
-                       hyperpar,
-                       ncore)
+  fit_asmc <- ASMC(K,
+                   smc_tuning_param,
+                   data,
+                   is_unknownPar,
+                   Simplemodel,
+                   pars,
+                   likelihood_delay,
+                   unlist(Lpars[!is_unknownLPar]),
+                   unlist(Lpars[is_unknownLPar]),
+                   reference_prior_list,
+                   hyperpar,
+                   ncore)
   saveRDS(fit_asmc, "fit_asmc.rds")
 }
 

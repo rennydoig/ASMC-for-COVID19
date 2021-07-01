@@ -224,16 +224,16 @@ ncore <- 8
 set.seed(501)
 
 
-fit_asmc <- ASMC2_LP(K,
-                     smc_tuning_param,
-                     data,
-                     is_unknownPar,
-                     PhysDistmodel,
-                     pars,
-                     likelihood_delay,
-                     unlist(Lpars[!is_unknownLPar]),
-                     unlist(Lpars[is_unknownLPar]),
-                     reference_prior_list,
-                     hyperpar,
-                     ncore)
+fit_asmc <- ASMC(K,
+                 smc_tuning_param,
+                 data,
+                 is_unknownPar,
+                 PhysDistmodel,
+                 pars,
+                 likelihood_delay,
+                 unlist(Lpars[!is_unknownLPar]),
+                 unlist(Lpars[is_unknownLPar]),
+                 reference_prior_list,
+                 hyperpar,
+                 ncore)
 saveRDS(fit_asmc, "fit_asmc.rds")
